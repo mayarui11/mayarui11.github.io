@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>angular应用socket.io实现双向通信 - 小马过河</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="小马识途,"> 
+    <meta name="description" content="描述啊, 累了,socket.io 实现双向的实时通信
+
+安装
+npm install socket.io
+npm install socket.io-client
+webSocket.service.ts1234,"> 
+    <meta name="author" content="mayarui"> 
+    <link rel="alternative" href="atom.xml" title="小马过河" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="loading">
+    <span id="config-title" style="display:none">小马过河</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://example.com"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">angular应用socket.io实现双向通信</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">angular应用socket.io实现双向通信</h1>
+        <div class="stuff">
+            <span>四月 20, 2022</span>
+            
+
+        </div>
+        <div class="content markdown">
+            <p><a target="_blank" rel="noopener" href="http://socket.io">socket.io</a> 实现双向的实时通信</p>
+<ol>
+<li>安装<br>
+<code>npm install socket.io</code><br>
+<code>npm install socket.io-client</code></li>
+<li>webSocket.service.ts<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;Injectable&#125; <span class="keyword">from</span> <span class="string">&#x27;@angular/core&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> io <span class="keyword">from</span> <span class="string">&#x27;socket.io-client&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;Subject&#125; <span class="keyword">from</span> <span class="string">&#x27;rxjs/Subject&#x27;</span>;<span class="keyword">import</span> &#123;Observable&#125; <span class="keyword">from</span> <span class="string">&#x27;rxjs/Observable&#x27;</span>;</span><br><span class="line"><span class="meta">@Injectable</span>(&#123;</span><br><span class="line">    <span class="attr">providedIn</span>: <span class="string">&#x27;root&#x27;</span>,</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSocketService</span> </span>&#123;</span><br><span class="line"><span class="keyword">private</span> ws: <span class="built_in">any</span>;</span><br><span class="line"> <span class="keyword">private</span> message: Subject&lt;<span class="built_in">any</span>&gt; = <span class="keyword">new</span> Subject&lt;<span class="built_in">any</span>&gt;();</span><br><span class="line"> <span class="comment">// 获取sessionId</span></span><br><span class="line"> <span class="keyword">public</span> globalSessionId: BehaviorSubject&lt;<span class="built_in">string</span>&gt; = <span class="keyword">new</span> BehaviorSubject(<span class="literal">null</span>);</span><br><span class="line"> <span class="function"><span class="title">constructor</span>(<span class="params"></span>)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="title">setGlobalSessionId</span>(<span class="params">id: <span class="built_in">string</span></span>)</span> &#123;</span><br><span class="line">     <span class="built_in">this</span>.globalSessionId.next(id);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> getGlobalSessionId(): Observable&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="built_in">this</span>.globalSessionId;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 建立连接,</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> connetSocket(url): Observable&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> Obserble(<span class="function">(<span class="params">observer</span>) =&gt;</span> &#123;</span><br><span class="line">         <span class="built_in">this</span>.ws = io(url);</span><br><span class="line">         <span class="built_in">this</span>.ws.on(<span class="string">&#x27;message_out&#x27;</span>, <span class="function">(<span class="params">data</span>) =&gt;</span> &#123;</span><br><span class="line">         <span class="built_in">this</span>.setGlobalSessionId(<span class="built_in">this</span>.ws.io.engine.id);</span><br><span class="line">         observer.next(data);</span><br><span class="line">     &#125;);</span><br><span class="line">     &#125;)        </span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 发送消息</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="function"><span class="title">sendMessage</span>(<span class="params">message: <span class="built_in">any</span></span>)</span> &#123;</span><br><span class="line">     <span class="built_in">this</span>.ws.emit(<span class="string">&#x27;message_in&#x27;</span>, message);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 断开连接</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="function"><span class="title">cutConnection</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">     <span class="built_in">this</span>.ws.on(<span class="string">&#x27;disconnect&#x27;</span>, <span class="function">() =&gt;</span> &#123;&#125;);</span><br><span class="line">     <span class="keyword">return</span> <span class="function">() =&gt;</span> <span class="built_in">this</span>.ws.disconnect;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li>使用<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;WebSocketService&#125; <span class="keyword">from</span> <span class="string">&#x27;./service/websocket.service.ts&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">    <span class="attr">selector</span>: <span class="string">&#x27;app-chat&#x27;</span>,</span><br><span class="line">    <span class="attr">templateUrl</span>: <span class="string">&#x27;./chat.component.html&#x27;</span>,</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">ChatComponent</span> <span class="title">implements</span> <span class="title">OnInit</span>, <span class="title">OnDestory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="attr">connection</span>: <span class="built_in">any</span>;</span><br><span class="line">    <span class="comment">// 双向绑定input值</span></span><br><span class="line">    userText: <span class="built_in">string</span> = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">constructor</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> webSocketService: WebSocketService;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ngOnInit(): <span class="built_in">void</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开对话框, 建立连接接收消息</span></span><br><span class="line">    <span class="function"><span class="title">openChat</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.connection = <span class="built_in">this</span>.webSocketService.connetSocket().subscribe(<span class="function">(<span class="params">res: <span class="built_in">any</span></span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span>(res.code == <span class="number">200</span>) &#123;</span><br><span class="line">                <span class="comment">// .......</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 点击按钮发送消息或回车</span></span><br><span class="line">    <span class="function"><span class="title">sendMessage</span>(<span class="params">event?: KeyBoardEvent</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(!event || (event.keyCode === <span class="number">13</span>) &amp;&amp; <span class="built_in">this</span>.userText.trim().length) &#123;</span><br><span class="line">            <span class="built_in">this</span>.webSocketService.sendMessage(<span class="built_in">this</span>.userText);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 组件销毁断开连接</span></span><br><span class="line">    <span class="function"><span class="title">ngOnDestory</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">this</span>.connection) &#123;</span><br><span class="line">            <span class="built_in">this</span>.connection.unsubscribe();</span><br><span class="line">            <span class="built_in">this</span>.webSocketService.cutConnection();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/463754864.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='true'
+        data-ae='true'
+        data-ci='ab17dc699065c203eea9'
+        data-cs='2878ae56a74088a4c3c90a592f2c5d291a1cd1ce'
+        data-r='mayarui11.github.io'
+        data-o='mayarui11'
+        data-a='mayarui11'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>

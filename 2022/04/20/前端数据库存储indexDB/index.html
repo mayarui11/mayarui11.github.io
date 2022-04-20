@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>前端数据库存储indexDB - 小马过河</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="小马识途,"> 
+    <meta name="description" content="描述啊, 累了,
+
+需求: 只为用户展示当次登录的聊天记录, 为了减少接口请求并且可以存储大量的数据
+
+
+Cookie 的大小不超过4KB, LocalStorage 在 2.5MB 到 10MB 之间
+
+
+ind,"> 
+    <meta name="author" content="mayarui"> 
+    <link rel="alternative" href="atom.xml" title="小马过河" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="loading">
+    <span id="config-title" style="display:none">小马过河</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://example.com"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">前端数据库存储indexDB</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">前端数据库存储indexDB</h1>
+        <div class="stuff">
+            <span>四月 20, 2022</span>
+            
+
+        </div>
+        <div class="content markdown">
+            <ul>
+<li>
+<p>需求: 只为用户展示当次登录的聊天记录, 为了减少接口请求并且可以存储大量的数据</p>
+</li>
+<li>
+<p>Cookie 的大小不超过4KB, LocalStorage 在 2.5MB 到 10MB 之间</p>
+</li>
+<li>
+<p>indexDB是浏览器提供的本地数据库, 允许储存大量数据, 提供查找接口, 还能建立索引</p>
+</li>
+<li>
+<p><code> Uncaught Failed to execute 'transaction' on 'IDBDatabase'</code>由于在进行数据库操作时我们并不能保证数据库是打开的状态,所以每次进行事务操作前, 都要先执行open()操作</p>
+</li>
+<li>
+<p>indexDBService</p>
+</li>
+</ul>
+  <figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">WorkIndexedDBService</span> </span>&#123;</span><br><span class="line">    db = <span class="literal">null</span>;</span><br><span class="line">    dbName = <span class="string">&#x27;testDB&#x27;</span>;</span><br><span class="line">    tableName = <span class="string">&#x27;testTable&#x27;</span>;</span><br><span class="line">    version = <span class="number">1</span>;</span><br><span class="line">    callback: <span class="built_in">any</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">connectDB</span>(<span class="params">dbName, version, callback = (() =&gt; &#123; &#125;)</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> request = indexedDB.open(dbName, version)</span><br><span class="line">            request.onerror = <span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="built_in">console</span>.error(<span class="string">&#x27;open indexedDB failed&#x27;</span>, err)</span><br><span class="line">                <span class="comment">// VER_ERR 表明存储在磁盘上的数据库的版本高于你试图打开的版本</span></span><br><span class="line">                <span class="built_in">this</span>.db = <span class="literal">null</span></span><br><span class="line">                reject(<span class="literal">null</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            request.onsuccess = <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="built_in">this</span>.db = event.target[<span class="string">&#x27;result&#x27;</span>];</span><br><span class="line">                <span class="built_in">this</span>.dbName = dbName;</span><br><span class="line">                <span class="built_in">this</span>.version = version;</span><br><span class="line">                resolve(event.target.result);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 创建一个新的数据库或者增加已存在的数据库的版本号</span></span><br><span class="line">            request.onupgradeneeded = <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="built_in">this</span>.db = event.target[<span class="string">&#x27;result&#x27;</span>];</span><br><span class="line">                <span class="built_in">this</span>.dbName = dbName;</span><br><span class="line">                <span class="built_in">this</span>.version = version;</span><br><span class="line">                <span class="built_in">this</span>.callback = callback;</span><br><span class="line">                callback(<span class="built_in">this</span>.db);</span><br><span class="line">                <span class="built_in">this</span>.createObjectStore()</span><br><span class="line">                <span class="comment">// resolve(event.target.result)</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始化，连接数据库</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>dbName </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>version 不能使用浮点型，会自动取整</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">openDB</span>(<span class="params">dbName, version, callback</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.db) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">this</span>.db</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!dbName &amp;&amp; !<span class="built_in">this</span>.dbName) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">&#x27;database name is Empty&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">this</span>.db = <span class="keyword">await</span> <span class="built_in">this</span>.connectDB(dbName || <span class="built_in">this</span>.dbName, version || <span class="built_in">this</span>.version, callback)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取仓库对象（IDBObjectStore），类似于数据库表</span></span><br><span class="line"><span class="comment">     * 用于创建数据库表，拿到此对象后创建索引</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">createObjectStore</span>(<span class="params">storeName, key = <span class="string">&#x27;id&#x27;</span></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">await</span> <span class="built_in">this</span>.openDB()</span><br><span class="line">        <span class="comment">// 已经存在的情况，不考虑删表再建，会丢失数据</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.db.objectStoreNames.contains(storeName)) &#123;</span><br><span class="line">            <span class="comment">// throw new Error(&#x27;ObjectStore is created&#x27;) </span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.db.createObjectStore(storeName, &#123; <span class="attr">keyPath</span>: key &#125;) <span class="comment">// 建表;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 添加数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>storeName 仓库名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>data 需要更新的数据，不存在就新增</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>itemSuccessFn 单个执行成功的方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">add</span>(<span class="params">storeName, data: <span class="built_in">any</span> | <span class="built_in">any</span>[], itemSuccessFn?: <span class="built_in">any</span></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> <span class="built_in">this</span>.operate(storeName, data, itemSuccessFn)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 更新数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>storeName 仓库名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>data 需要更新的数据，不存在就新增</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>itemSuccessFn 单个执行成功的方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">update</span>(<span class="params">storeName, data: <span class="built_in">any</span> | <span class="built_in">any</span>[], itemSuccessFn = (() =&gt; &#123; &#125;)</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> <span class="built_in">this</span>.operate(storeName, data, itemSuccessFn)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>storeName 仓库名</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>key 需要输出的keyPath, key不传默认删除storeName的所有数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>itemSuccessFn 单个执行成功的方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">delete</span>(<span class="params">storeName, key?: <span class="built_in">any</span> | <span class="built_in">any</span>[], itemSuccessFn = (() =&gt; &#123; &#125;)</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> allKeyPathArr = [];</span><br><span class="line">        <span class="keyword">if</span> (!key) &#123;</span><br><span class="line">            <span class="keyword">const</span> allData = <span class="keyword">await</span> <span class="built_in">this</span>.getData(<span class="built_in">this</span>.tableName);</span><br><span class="line">            <span class="keyword">if</span> (allData &amp;&amp; allData.length) &#123;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; allData.length; i++) &#123;</span><br><span class="line">                    allKeyPathArr.push(allData[i][<span class="string">&#x27;id&#x27;</span>]);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            key = allKeyPathArr;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (key &amp;&amp; key.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">await</span> <span class="built_in">this</span>.operate(storeName, key, itemSuccessFn, <span class="string">&#x27;delete&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">operate</span>(<span class="params">storeName, data: <span class="built_in">any</span> | <span class="built_in">any</span>[], itemSuccessFn = (() =&gt; &#123; &#125;), <span class="keyword">type</span> = <span class="string">&#x27;put&#x27;</span></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">await</span> <span class="built_in">this</span>.openDB()</span><br><span class="line">            <span class="comment">// 事务希望跨越的对象存储空间的列表</span></span><br><span class="line">            <span class="keyword">let</span> transaction = <span class="built_in">this</span>.db.transaction([storeName], IDBTransaction.READ_WRITE || <span class="string">&#x27;readwrite&#x27;</span>)</span><br><span class="line">            <span class="keyword">let</span> objStore = transaction.objectStore(storeName)</span><br><span class="line">            data = <span class="built_in">Array</span>.isArray(data) ? data : [data]</span><br><span class="line">            data.forEach(<span class="function"><span class="params">i</span> =&gt;</span> &#123;</span><br><span class="line">                <span class="keyword">let</span> _request = objStore[<span class="keyword">type</span>](i)</span><br><span class="line">                _request.onsuccess = <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="comment">// event.target.result === i.key; 对象仓库使用 key 属性作为键路径（key path)</span></span><br><span class="line">                    <span class="comment">// typeof itemSuccessFn === &#x27;function&#x27; &amp;&amp; itemSuccessFn(event.target.result)</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="comment">// 使用事务的 oncomplete 事件确保所有数据都被添加完毕</span></span><br><span class="line">                transaction.oncomplete = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">                    resolve(<span class="literal">true</span>)</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 事务error处理</span></span><br><span class="line">                transaction.onerror = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">                    resolve(<span class="literal">false</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">            <span class="built_in">console</span>.error(<span class="string">&#x27;operate data failed&#x27;</span>, err)</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(<span class="literal">false</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取单行数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>storeName 需要查询的仓库</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>key 传了key就制定key去查找数据，不传就查所有数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>storeIndex 索引，可以让你搜索任意字段，也就是说从任意字段拿到数据记录。如果不建立索引，默认只能搜索主键（即从主键取值）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="title">getData</span>(<span class="params">storeName, key, storeIndex</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">await</span> <span class="built_in">this</span>.openDB()</span><br><span class="line">            <span class="comment">// 事务希望跨越的对象存储空间的列表</span></span><br><span class="line">            <span class="keyword">let</span> transaction = <span class="built_in">this</span>.db.transaction([storeName], <span class="string">&#x27;readonly&#x27;</span>)</span><br><span class="line">            <span class="keyword">let</span> objStore = transaction.objectStore(storeName)</span><br><span class="line">            <span class="comment">// 获取查看范围数据对象</span></span><br><span class="line">            <span class="keyword">let</span> request = key ? (storeIndex ? objStore.index(storeIndex).get(key) : objStore.get(key)) : objStore.openCursor()</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="keyword">let</span> data = []</span><br><span class="line">                request.onsuccess = <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!key) &#123;</span><br><span class="line">                        <span class="keyword">let</span> cursor = event.target.result</span><br><span class="line">                        <span class="keyword">if</span> (cursor) &#123;</span><br><span class="line">                            data.push(cursor.value)</span><br><span class="line">                            cursor.continue()</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            resolve(data)</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">if</span> (event.target.result) &#123;</span><br><span class="line">                            resolve([event.target.result])</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            resolve([])</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                request.onerror = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">                    resolve([])</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">            <span class="built_in">console</span>.error(<span class="string">&#x27;add data failed&#x27;</span>, err)</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve([])</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">  <span class="string">``</span><span class="string">`   </span></span><br><span class="line"><span class="string"> - 使用</span></span><br><span class="line"><span class="string">  `</span><span class="string">``</span>ts</span><br><span class="line">  <span class="comment">// 新建数据库, 获取数据库内全部数据</span></span><br><span class="line">  <span class="keyword">const</span> testDataBase = <span class="keyword">await</span> <span class="built_in">this</span>.workIndexDBSevice.getData(<span class="string">&#x27;testTable&#x27;</span>)</span><br><span class="line">  <span class="keyword">if</span> (testDataBase &amp;&amp; testDataBase.length) &#123;</span><br><span class="line">      testDataBase.forEach(<span class="function">(<span class="params">item</span>) =&gt;</span> &#123;</span><br><span class="line">          <span class="built_in">this</span>.contentRecord.push(item.content);</span><br><span class="line">      &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 新增数据</span></span><br><span class="line">  <span class="built_in">this</span>.workIndexDBService.add(<span class="string">&#x27;testTable&#x27;</span>, &#123;<span class="attr">id</span>: <span class="built_in">this</span>.contentRecord.length - <span class="number">1</span>, <span class="attr">content</span>: testData&#125;);</span><br><span class="line">  <span class="comment">// 删除数据</span></span><br><span class="line">  <span class="built_in">this</span>.workIndexDBService.delete(<span class="string">&#x27;testTable&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/463754864.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='true'
+        data-ae='true'
+        data-ci='ab17dc699065c203eea9'
+        data-cs='2878ae56a74088a4c3c90a592f2c5d291a1cd1ce'
+        data-r='mayarui11.github.io'
+        data-o='mayarui11'
+        data-a='mayarui11'
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
